@@ -1,4 +1,4 @@
-package com.product.catalog.exceptions;
+package com.product.catalog.services.exceptions;
 
 public class ResourceNotFoundException extends RuntimeException{
 
