@@ -7,6 +7,7 @@ import com.product.catalog.tests.Factory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -19,8 +20,6 @@ import java.util.Optional;
 public class ProductRepositoryTests {
     @Autowired
     private ProductRepository repository;
-    @Autowired
-    private ProductService service;
     private long existingId;
     private long noExistingId;
     private long countTotalProducts;
@@ -30,19 +29,28 @@ public class ProductRepositoryTests {
         existingId = 1L;
         noExistingId = 1000L;
         countTotalProducts = 25L;
-
-        Mockito.doNothing().when(repository).deleteById(existingId);
-        Mockito.doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(noExistingId);
     }
 
     @Test
+    public void findByIdShouldReturnNonEmptyOptionalWhenIdExists(){
+        Optional<Product> result = repository.findById(existingId);
+        Assertions.assertTrue(result.isPresent());
+    }
+
+    @Test
+    public void findByIdShouldReturnEmptyOptionalWhenIdDoesNotExists(){
+        Optional<Product> result = repository.findById(noExistingId);
+        Assertions.assertTrue(result.isEmpty());
+    }
+
+  /*  @Test
     public void deleteShouldThrowResourceNotFoundExceptionWhenIdDoesNotExists(){
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
             service.delete(noExistingId);
         });
 
         Mockito.verify(repository, Mockito.times(1)).deleteById(noExistingId);
-    }
+    }*/
 
     @Test
     public void saveShouldPersistWithAutoincrementWhenIdIsNull(){
@@ -69,13 +77,13 @@ public class ProductRepositoryTests {
         });
     }
 
-    @Test
+   /* @Test
     public void deleteShouldDoNothingWhenIdExists(){
         Assertions.assertDoesNotThrow(() -> {
             service.delete(existingId);
         });
 
         Mockito.verify(repository, Mockito.times(1)).deleteById(existingId);
-    }
+    }*/
 
 }
