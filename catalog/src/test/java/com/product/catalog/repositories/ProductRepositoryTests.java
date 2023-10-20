@@ -2,6 +2,7 @@ package com.product.catalog.repositories;
 
 import com.product.catalog.entities.Product;
 import com.product.catalog.services.ProductService;
+import com.product.catalog.services.exceptions.ResourceNotFoundException;
 import com.product.catalog.tests.Factory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +36,12 @@ public class ProductRepositoryTests {
     }
 
     @Test
-    public void deleteShouldThrowEmptyResultDataAccessExceptionWhenIdDoesNotExists(){
+    public void deleteShouldThrowResourceNotFoundExceptionWhenIdDoesNotExists(){
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            service.delete(noExistingId);
+        });
 
+        Mockito.verify(repository, Mockito.times(1)).deleteById(noExistingId);
     }
 
     @Test
