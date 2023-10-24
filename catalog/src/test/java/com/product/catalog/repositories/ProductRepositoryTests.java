@@ -7,28 +7,40 @@ import com.product.catalog.tests.Factory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Optional;
-
-@DataJpaTest
+@ExtendWith(SpringExtension.class)
+//@DataJpaTest
 public class ProductRepositoryTests {
-    @Autowired
+    //@Autowired
+    @Mock
     private ProductRepository repository;
+    @InjectMocks
+    private ProductService service;
     private long existingId;
     private long noExistingId;
     private long countTotalProducts;
+    private Product product;
+    private PageImpl<Product> page;
 
     @BeforeEach
     void setUp() throws Exception{
         existingId = 1L;
         noExistingId = 1000L;
         countTotalProducts = 25L;
+
+        Mockito.doNothing().when(repository).deleteById(existingId);
+        Mockito.doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(noExistingId);
     }
 
     @Test
@@ -43,14 +55,14 @@ public class ProductRepositoryTests {
         Assertions.assertTrue(result.isEmpty());
     }
 
-  /*  @Test
+    @Test
     public void deleteShouldThrowResourceNotFoundExceptionWhenIdDoesNotExists(){
         Assertions.assertThrows(ResourceNotFoundException.class, () -> {
             service.delete(noExistingId);
         });
 
         Mockito.verify(repository, Mockito.times(1)).deleteById(noExistingId);
-    }*/
+    }
 
     @Test
     public void saveShouldPersistWithAutoincrementWhenIdIsNull(){
