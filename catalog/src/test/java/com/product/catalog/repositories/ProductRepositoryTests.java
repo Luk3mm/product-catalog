@@ -8,16 +8,20 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.List;
 import java.util.Optional;
 @ExtendWith(SpringExtension.class)
 //@DataJpaTest
@@ -27,10 +31,11 @@ public class ProductRepositoryTests {
     private ProductRepository repository;
     @InjectMocks
     private ProductService service;
+    private Product product;
     private long existingId;
     private long noExistingId;
     private long countTotalProducts;
-    private Product product;
+    private long dependentId;
     private PageImpl<Product> page;
 
     @BeforeEach
@@ -38,9 +43,18 @@ public class ProductRepositoryTests {
         existingId = 1L;
         noExistingId = 1000L;
         countTotalProducts = 25L;
+        dependentId = 3L;
+        product = Factory.createProduct();
+        page = new PageImpl<>(List.of(product));
+
+        Mockito.when(repository.findAll((Pageable)ArgumentMatchers.any())).thenReturn(page);
+        Mockito.when(repository.save(ArgumentMatchers.any())).thenReturn(product);
+        Mockito.when(repository.findById(existingId)).thenReturn(Optional.of(product));
+        Mockito.when(repository.findById(noExistingId)).thenReturn(Optional.empty());
 
         Mockito.doNothing().when(repository).deleteById(existingId);
         Mockito.doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(noExistingId);
+        Mockito.doThrow(DataIntegrityViolationException.class).when(repository).deleteById(dependentId);
     }
 
     @Test
