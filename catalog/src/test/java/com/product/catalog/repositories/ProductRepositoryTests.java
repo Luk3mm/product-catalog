@@ -1,7 +1,9 @@
 package com.product.catalog.repositories;
 
+import com.product.catalog.dto.ProductDTO;
 import com.product.catalog.entities.Product;
 import com.product.catalog.services.ProductService;
+import com.product.catalog.services.exceptions.DatabaseException;
 import com.product.catalog.services.exceptions.ResourceNotFoundException;
 import com.product.catalog.tests.Factory;
 import org.junit.jupiter.api.Assertions;
@@ -16,7 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -55,6 +59,29 @@ public class ProductRepositoryTests {
         Mockito.doNothing().when(repository).deleteById(existingId);
         Mockito.doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(noExistingId);
         Mockito.doThrow(DataIntegrityViolationException.class).when(repository).deleteById(dependentId);
+    }
+
+    @Test
+    public void findByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist(){
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
+            ProductDTO result = service.findById(noExistingId);
+        });
+    }
+
+    @Test
+    public void findByIdShouldReturnProductDTOWhenIdExists(){
+        ProductDTO result = service.findById(existingId);
+        Assertions.assertNotNull(result);
+    }
+
+    @Test
+    public void findAllPagedShouldReturnPage(){
+        Pageable pageable = PageRequest.of(0, 10);
+
+        Page<ProductDTO> result = service.findAllPaged(pageable);
+
+        Assertions.assertNotNull(result);
+        Mockito.verify(repository).findAll(pageable);
     }
 
     @Test
@@ -103,13 +130,12 @@ public class ProductRepositoryTests {
         });
     }
 
-   /* @Test
+   @Test
     public void deleteShouldDoNothingWhenIdExists(){
         Assertions.assertDoesNotThrow(() -> {
             service.delete(existingId);
         });
 
         Mockito.verify(repository, Mockito.times(1)).deleteById(existingId);
-    }*/
-
+    }
 }
