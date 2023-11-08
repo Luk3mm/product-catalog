@@ -27,82 +27,20 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Optional;
-@ExtendWith(SpringExtension.class)
-//@DataJpaTest
+
+@DataJpaTest
 public class ProductRepositoryTests {
-    //@Autowired
-    @Mock
+    @Autowired
     private ProductRepository repository;
-    @InjectMocks
-    private ProductService service;
-    private Product product;
     private long existingId;
     private long noExistingId;
     private long countTotalProducts;
-    private long dependentId;
-    private PageImpl<Product> page;
 
     @BeforeEach
     void setUp() throws Exception{
         existingId = 1L;
         noExistingId = 1000L;
         countTotalProducts = 25L;
-        dependentId = 3L;
-        product = Factory.createProduct();
-        page = new PageImpl<>(List.of(product));
-
-        Mockito.when(repository.findAll((Pageable)ArgumentMatchers.any())).thenReturn(page);
-        Mockito.when(repository.save(ArgumentMatchers.any())).thenReturn(product);
-        Mockito.when(repository.findById(existingId)).thenReturn(Optional.of(product));
-        Mockito.when(repository.findById(noExistingId)).thenReturn(Optional.empty());
-
-        Mockito.doNothing().when(repository).deleteById(existingId);
-        Mockito.doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(noExistingId);
-        Mockito.doThrow(DataIntegrityViolationException.class).when(repository).deleteById(dependentId);
-    }
-
-    @Test
-    public void findByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExist(){
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            ProductDTO result = service.findById(noExistingId);
-        });
-    }
-
-    @Test
-    public void findByIdShouldReturnProductDTOWhenIdExists(){
-        ProductDTO result = service.findById(existingId);
-        Assertions.assertNotNull(result);
-    }
-
-    @Test
-    public void findAllPagedShouldReturnPage(){
-        Pageable pageable = PageRequest.of(0, 10);
-
-        Page<ProductDTO> result = service.findAllPaged(pageable);
-
-        Assertions.assertNotNull(result);
-        Mockito.verify(repository).findAll(pageable);
-    }
-
-    @Test
-    public void findByIdShouldReturnNonEmptyOptionalWhenIdExists(){
-        Optional<Product> result = repository.findById(existingId);
-        Assertions.assertTrue(result.isPresent());
-    }
-
-    @Test
-    public void findByIdShouldReturnEmptyOptionalWhenIdDoesNotExists(){
-        Optional<Product> result = repository.findById(noExistingId);
-        Assertions.assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void deleteShouldThrowResourceNotFoundExceptionWhenIdDoesNotExists(){
-        Assertions.assertThrows(ResourceNotFoundException.class, () -> {
-            service.delete(noExistingId);
-        });
-
-        Mockito.verify(repository, Mockito.times(1)).deleteById(noExistingId);
     }
 
     @Test
@@ -110,9 +48,12 @@ public class ProductRepositoryTests {
         Product product = Factory.createProduct();
         product.setId(null);
         product = repository.save(product);
+        Optional<Product> result = repository.findById(product.getId());
 
         Assertions.assertNotNull(product.getId());
-        Assertions.assertEquals(countTotalProducts + 1, product.getId());
+        Assertions.assertEquals(countTotalProducts + 1L, product.getId());
+        Assertions.assertTrue(result.isPresent());
+        Assertions.assertSame(result.get(), product);
     }
 
     @Test
@@ -128,14 +69,5 @@ public class ProductRepositoryTests {
         Assertions.assertThrows(EmptyResultDataAccessException.class, () -> {
            repository.deleteById(noExistingId);
         });
-    }
-
-   @Test
-    public void deleteShouldDoNothingWhenIdExists(){
-        Assertions.assertDoesNotThrow(() -> {
-            service.delete(existingId);
-        });
-
-        Mockito.verify(repository, Mockito.times(1)).deleteById(existingId);
     }
 }
