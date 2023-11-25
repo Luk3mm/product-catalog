@@ -1,0 +1,1 @@
+GET http://localhost:8080/users?page=0&size=12&sort=firstName
