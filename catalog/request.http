@@ -1,1 +1,21 @@
-GET http://localhost:8080/users?page=0&size=12&sort=firstName
+//GET http://localhost:8080/users?page=0&size=12&sort=firstName
+
+//GET http://localhost:8080/users/1
+
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+    "firstName": "Bob",
+    "lastName": "Brown",
+    "email": "bob@gmail.com",
+    "password": "12345",
+    "roles": [
+        {
+            "id": 1
+        },
+        {
+            "id": 2
+        }
+    ]
+}
