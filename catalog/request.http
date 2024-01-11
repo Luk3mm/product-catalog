@@ -2,20 +2,39 @@
 
 //GET http://localhost:8080/users/1
 
-POST http://localhost:8080/users
+//POST http://localhost:8080/users
+//Content-Type: application/json
+
+//{
+   // "firstName": "Bob",
+//    "lastName": "Brown",
+//    "email": "bob@gmail.com",
+  //  "password": "12345",
+    //"roles": [
+      //  {
+        //    "id": 1
+        //},
+        //{
+          //  "id": 2
+        //}
+    //]
+//}
+
+POST http://localhost:8080/products
 Content-Type: application/json
 
 {
-    "firstName": "Bob",
-    "lastName": "Brown",
-    "email": "bob@gmail.com",
-    "password": "12345",
-    "roles": [
+    "date": "2020-07-20T10:00:00Z",
+    "description": "The new generation",
+    "name": "PS5",
+    "imgUrl": "",
+    "price": 0.0,
+    "categories": [
         {
             "id": 1
         },
         {
-            "id": 2
+            "id": 3
         }
     ]
 }
